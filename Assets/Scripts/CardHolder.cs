@@ -7,6 +7,8 @@ public class CardHolder : MonoBehaviour
 {
 
     
+    StateManager stateManager;
+
     List<Transform> childTransforms;
 
     private Vector2[] tforms = 
@@ -27,6 +29,7 @@ public class CardHolder : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {      
+      stateManager = FindObjectOfType<StateManager>();
       gameState = new List<string>();
       childTransforms = new List<Transform>();
       matches = new Dictionary<string, bool>();
@@ -50,6 +53,7 @@ public class CardHolder : MonoBehaviour
     }
 
          
+         
     private void Update() {
       if(gameState.Count > 1)
       {
@@ -57,6 +61,10 @@ public class CardHolder : MonoBehaviour
         {
           matches[gameState[0]] = true;
           gameState.Clear();
+
+          if(!matches.ContainsValue(false)){
+            stateManager.GameOver();
+          }
         }
 
         else
@@ -71,5 +79,5 @@ public class CardHolder : MonoBehaviour
           gameState.Clear();
         }
       }
-    }
+    }    
 }
