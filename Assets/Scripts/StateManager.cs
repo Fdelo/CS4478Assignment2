@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+
+//Simlple State manager to test for if the player has won
 public class StateManager : MonoBehaviour
 {
 
@@ -10,23 +12,26 @@ public class StateManager : MonoBehaviour
   bool gameEnded = false;
 
   private void Awake() {
-      gameOverScreen = FindObjectOfType<Canvas>();
-      // gameOverScreen.gameObject.SetActive(false);
-      gameOverScreen.enabled = false;
+    // Find the canvas and store it in a variable
+    gameOverScreen = FindObjectOfType<Canvas>();
+    
+    //turn it off
+    gameOverScreen.enabled = false;
   }
 
   public void GameOver () {
 
     if(!gameEnded)
     {
+      //Turn on the screen
       gameEnded = true;
-      // gameOverScreen.gameObject.SetActive(true);      
       gameOverScreen.enabled = true;
     } 
   }
 
   public void Restart()
   {
+    // Onclick function for the button, use scenemanager to restart the scene
     SceneManager.LoadScene(SceneManager.GetActiveScene().name);
   }
 }

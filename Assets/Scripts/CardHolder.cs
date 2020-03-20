@@ -6,78 +6,84 @@ using System.Linq;
 public class CardHolder : MonoBehaviour
 {
 
-    
-    StateManager stateManager;
+  StateManager stateManager;
 
-    List<Transform> childTransforms;
+  List<Transform> childTransforms;
 
-    private Vector2[] tforms = 
+  // predefine the grid that the cards sit on
+  // these get shuffled at the start of the scene
+  private Vector2[] tforms =
+  {
+    new Vector2(-2, 1),
+    new Vector2(2, 1),
+    new Vector2(6, 1),
+    new Vector2(6, -2),
+    new Vector2(2, -2),
+    new Vector2(-2, -2),
+    new Vector2(-6, 1),
+    new Vector2(-6, -2)
+  };
+
+  public List<string> gameState; // Track which cards are currently flipped
+  public Dictionary<string, bool> matches; // Track the matches the player has
+
+  void Start()
+  {
+    //Initialize variables
+    stateManager = FindObjectOfType<StateManager>();
+    gameState = new List<string>();
+    childTransforms = new List<Transform>();
+    matches = new Dictionary<string, bool>();
+    matches.Add("cow", false);
+    matches.Add("cat", false);
+    matches.Add("sheep", false);
+    matches.Add("mouse", false);
+
+    int i = 0;
+    //initialze the array containing references to all the child tranforms
+    foreach (Transform tr in transform)
     {
-      new Vector2(-2, 1),
-      new Vector2(2, 1),
-      new Vector2(6, 1),
-      new Vector2(6, -2),
-      new Vector2(2, -2),
-      new Vector2(-2, -2),
-      new Vector2(-6, 1),
-      new Vector2(-6, -2)
-    };
+      childTransforms.Add(tr);
+    }
+    i = 0;
+    System.Random rnd = new System.Random();
+    //randomize the order of the transforms identified above
+    Vector2[] shuffled_tforms = tforms.OrderBy(x => rnd.Next()).ToArray();
+    foreach (Transform t in childTransforms)
+    {
+      t.position = shuffled_tforms[i];
+      // t.gameObject.GetComponentInChildren<Transform>().position = shuffled_tforms[i];
+      i++;
+    }
+  }
 
-    public List<string> gameState;
-    public Dictionary<string, bool> matches;
+  // Check the game state list
+  public void checkGameState()
+  {
+    // If the two selected cards are the same
+    if (gameState[0] == gameState[1])
+    {
+      matches[gameState[0]] = true;
+      gameState.Clear();
 
-    // Start is called before the first frame update
-    void Start()
-    {      
-      stateManager = FindObjectOfType<StateManager>();
-      gameState = new List<string>();
-      childTransforms = new List<Transform>();
-      matches = new Dictionary<string, bool>();
-      matches.Add("cow", false);
-      matches.Add("cat", false);
-      matches.Add("sheep", false);
-      matches.Add("mouse", false);
-      int i = 0;
-     
-      foreach (Transform tr in transform){
-        childTransforms.Add(tr);
-      }
-      i = 0;
-      System.Random rnd = new System.Random();
-      Vector2[] shuffled_tforms = tforms.OrderBy(x => rnd.Next()).ToArray();
-      foreach (Transform t in childTransforms)
+      if (!matches.ContainsValue(false))
       {
-        t.position = shuffled_tforms[i];          
-        i++;
+        stateManager.GameOver();
       }
     }
-
-         
-         
-    private void Update() {
-      if(gameState.Count > 1)
+    // Two selected cards are not the same    
+    else
+    {
+      System.Threading.Thread.Sleep(1000);
+      foreach (Transform tr in childTransforms)
       {
-        if(gameState[0] == gameState[1])
-        {
-          matches[gameState[0]] = true;
-          gameState.Clear();
 
-          if(!matches.ContainsValue(false)){
-            stateManager.GameOver();
-          }
-        }
-
-        else
+        if (tr.name.Substring(0, tr.name.Length - 1).ToLower() == gameState[0] || tr.name.Substring(0, tr.name.Length - 1).ToLower() == gameState[1])
         {
-          foreach(Transform tr in childTransforms)
-          {
-            if(tr.name.Substring(0, tr.name.Length - 1).ToLower() == gameState[0] || tr.name.Substring(0, tr.name.Length - 1).ToLower() == gameState[1])
-            {
-              tr.GetComponent<SpriteRenderer>().sprite = tr.gameObject.GetComponent<Card>().blank_art;
-            }            
-          }
-          gameState.Clear();
+          tr.GetComponent<Card>().spriteSwitch();
         }
       }
-    }    
+      gameState.Clear();
+    }
+  }
 }
